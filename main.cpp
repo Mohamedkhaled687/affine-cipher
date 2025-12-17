@@ -10,26 +10,27 @@
 /******************** Affine Cipher ********************/
 
 // Is an encryption technique that uses a mathematical function to encrypt and decrypt messages.
-// It is a type of substitution cipher where each letter of the alphabet is replaced by a number (0-16) in Somoan Alphabet.
-// The encryption function is: E(x) = (ax + b) % 17
-// The decryption function is : D(x) = a^-1 * (x - b) % 17
+// It is a type of substitution cipher where each symbol (space and letters) is replaced by a number (0-17) in Somoan Alphabet.
+// The alphabet consists of 18 symbols: space (index 0) and 17 letters (indices 1-17).
+// The encryption function is: E(x) = (ax + b) % 18
+// The decryption function is : D(x) = a^-1 * (x - b) % 18
 // where a and b are the key of the cipher.
-// a and 17 must be coprime (gcd (a , 17 ) = 1) this is because every element in Z_17 has a multiplicative inverse .
-/************ Proof of that a and 17 must be coprime ************/
-// let y after applying the encryption function is: y ≡ (ax + b) (mod 17)
-// ax ≡ y - b (mod 17)
-// x ≡ a^-1 * (y - b) (mod 17)
-// where a^-1 is the multiplicative inverse of a in Z_17.
+// a and 18 must be coprime (gcd (a , 18 ) = 1) this is because every element in Z_18 has a multiplicative inverse .
+/************ Proof of that a and 18 must be coprime ************/
+// let y after applying the encryption function is: y ≡ (ax + b) (mod 18)
+// ax ≡ y - b (mod 18)
+// x ≡ a^-1 * (y - b) (mod 18)
+// where a^-1 is the multiplicative inverse of a in Z_18.
 // This operation is valid only if a^-1 is exists.
 // Mathmeticly , a ^ -1 defined as number k 
-// a . k ≡ 1 (mod 17)
-// can writen a . k = 17.t + 1 for some integer t.
+// a . k ≡ 1 (mod 18)
+// can writen a . k = 18.t + 1 for some integer t.
 // Bezout's Identity states that for an equation of the form Ax+By=C to have integer solutions, gcd(A,B) must divide C.
-// In our case, A = a, B = 17, and C = 1.
-// Therefore, gcd(a, 17) must divide 1.
+// In our case, A = a, B = 18, and C = 1.
+// Therefore, gcd(a, 18) must divide 1.
 // The only positive integer that divides 1 is 1 itself.
-// Therefore, a and 17 must be coprime.
-/************ End of Proof of that a and 17 must be coprime ************/
+// Therefore, a and 18 must be coprime.
+/************ End of Proof of that a and 18 must be coprime ************/
 
 /************ Implementation of the Affine Cipher ************/
 
@@ -39,86 +40,92 @@
 
 using namespace std;
 
-// Mapping of the Somoan Alphabet to numbers (0-16)
+// Mapping of the Somoan Alphabet to numbers (0-17: space=0, letters=1-17)
 
 int somoan_alphabet_to_number(char letter){
+    // Space character is index 0
+    if(letter == ' '){
+        return 0;
+    }
     int lower_letter = tolower(letter);
     switch(lower_letter){
         case 'a' :
-            return 0;
-        case 'e' :
             return 1;
-        case 'i' :
+        case 'e' :
             return 2;
-        case 'o' :
+        case 'i' :
             return 3;
-        case 'u' :
+        case 'o' :
             return 4;
-        case 'f' :
+        case 'u' :
             return 5;
-        case 'g' :
+        case 'f' :
             return 6;
-        case 'l' :
+        case 'g' :
             return 7;
-        case 'm' :
+        case 'l' :
             return 8;
-        case 'n' :
+        case 'm' :
             return 9;
-        case 'p' :
+        case 'n' :
             return 10;
-        case 's' : 
+        case 'p' :
             return 11;
-        case 't' : 
+        case 's' : 
             return 12;
-        case 'v' :
+        case 't' : 
             return 13;
-        case 'h' : 
+        case 'v' :
             return 14;
-        case 'k' : 
+        case 'h' : 
             return 15;
-        case 'r' : 
+        case 'k' : 
             return 16;
+        case 'r' : 
+            return 17;
         default :
             throw invalid_argument("Invalid letter");
     }
 }
 
-// Mapping of numbers (0-16) to Somoan Alphabet letters
+// Mapping of numbers (0-17) to Somoan Alphabet (0=space, 1-17=letters)
 char number_to_somoan_alphabet(int number){
     switch(number){
         case 0 :
-            return 'a';
+            return ' ';
         case 1 :
-            return 'e';
+            return 'a';
         case 2 :
-            return 'i';
+            return 'e';
         case 3 :
-            return 'o';
+            return 'i';
         case 4 :
-            return 'u';
+            return 'o';
         case 5 :
-            return 'f';
+            return 'u';
         case 6 :
-            return 'g';
+            return 'f';
         case 7 :
-            return 'l';
+            return 'g';
         case 8 :
-            return 'm';
+            return 'l';
         case 9 :
-            return 'n';
+            return 'm';
         case 10 :
+            return 'n';
+        case 11 :
             return 'p';
-        case 11 : 
-            return 's';
         case 12 : 
+            return 's';
+        case 13 : 
             return 't';
-        case 13 :
+        case 14 :
             return 'v';
-        case 14 : 
-            return 'h';
         case 15 : 
-            return 'k';
+            return 'h';
         case 16 : 
+            return 'k';
+        case 17 : 
             return 'r';
         default :
             throw invalid_argument("Invalid number");
@@ -133,27 +140,33 @@ int get_modulo(int number, int modulus){
 // Function to get the inverse of the key (a) 
 
 int get_inverse_of_key(int a){
-    for(int i = 1; i < 17; i++){
-        if((a * i) % 17 == 1){
+    for(int i = 1; i < 18; i++){
+        if((a * i) % 18 == 1){
             return i;
         }
     }
-    throw invalid_argument("Invalid key , a and 17 must be coprime (choose another key from)");
+    throw invalid_argument("Invalid key , a and 18 must be coprime (choose another key from)");
 }
 // Function to encrypt a message using the Affine Cipher
 
 string encrypt_message(string message, int a, int b){
     string encrypted_message = "";
     for(char letter : message){
-        // Skip whitespace characters (spaces, tabs, etc.) and preserve them
-        if(isspace(letter)){
+        // Skip other whitespace characters (tabs, newlines, etc.) but encrypt spaces
+        if(isspace(letter) && letter != ' '){
             encrypted_message += letter;
             continue;
         }
         try {
             int mapped_number = somoan_alphabet_to_number(letter);
-            int encrypted_number = get_modulo(a * mapped_number + b, 17);
-            encrypted_message += (isupper(letter) ? toupper(number_to_somoan_alphabet(encrypted_number)) : number_to_somoan_alphabet(encrypted_number));
+            int encrypted_number = get_modulo(a * mapped_number + b, 18);
+            char encrypted_char = number_to_somoan_alphabet(encrypted_number);
+            // Preserve case for letters, but space is always space
+            if(encrypted_char == ' '){
+                encrypted_message += ' ';
+            } else {
+                encrypted_message += (isupper(letter) ? toupper(encrypted_char) : encrypted_char);
+            }
         } catch (const invalid_argument& e) {
             cout << "Error: The character '" << letter << "' is not in the Somoan Alphabet." << endl;
             throw; // Re-throw to allow caller to handle retry
@@ -168,18 +181,23 @@ string decrypt_message(string encrypted_message, int a, int b){
     string decrypted_message = "";
     int inverse_of_a = get_inverse_of_key(a);
     for (char letter : encrypted_message){
-        // Skip whitespace characters (spaces, tabs, etc.) and preserve them
-        if(isspace(letter)){
+        // Skip other whitespace characters (tabs, newlines, etc.) but decrypt spaces
+        if(isspace(letter) && letter != ' '){
             decrypted_message += letter;
             continue;
         }
         try {
             int mapped_number = somoan_alphabet_to_number(letter);
-            int decrypted_number = get_modulo(inverse_of_a * (mapped_number - b), 17);
-            decrypted_message += isupper(letter) ? toupper(number_to_somoan_alphabet(decrypted_number)) : number_to_somoan_alphabet(decrypted_number);
+            int decrypted_number = get_modulo(inverse_of_a * (mapped_number - b), 18);
+            char decrypted_char = number_to_somoan_alphabet(decrypted_number);
+            // Preserve case for letters, but space is always space
+            if(decrypted_char == ' '){
+                decrypted_message += ' ';
+            } else {
+                decrypted_message += isupper(letter) ? toupper(decrypted_char) : decrypted_char;
+            }
         } catch (const invalid_argument& e) {
             cout << "Error: The character '" << letter << "' is not in the Somoan Alphabet." << endl;
-            cout << "Please try again with a valid message containing only Somoan alphabet letters." << endl;
             throw; // Re-throw to allow caller to handle retry
         }
     }
@@ -195,14 +213,17 @@ int main(){
     
     while(!success){
         try {
-            cout << "Enter the message to encrypt: ";
+            cout << "Enter the message to encrypt in Somoan Alphabet (a, e, i, o, u, f, g, l, m, n, p, s, t, v, h, k, r) and spaces : ";
             getline(cin, message);
-            cout << "Enter the key (a): ";
+            cout << "Enter the first key (a): ";
             cin >> a;
-            cout << "Enter the key (b): ";
+            cout << "Enter the second key (b): ";
             cin >> b;
             // Clear the input buffer after reading b
             cin.ignore();
+            
+            // Validate the key before any encryption so we don't print output with a bad key
+            get_inverse_of_key(a);
             
             string encrypted_message = encrypt_message(message, a, b);
             cout << "Encrypted message: " << encrypted_message << endl;
@@ -214,7 +235,7 @@ int main(){
             // Check if it's an invalid key error
             if(error_msg.find("Invalid key") != string::npos){
                 cout << "Error: Invalid key!" << endl;
-                cout << "The key 'a' must be coprime with 17 (gcd(a, 17) = 1)." << endl;
+                cout << "The key 'a' must be coprime with 18 (gcd(a, 18) = 1)." << endl;
                 cout << "Please enter a different key (a)." << endl << endl;
             }
             // Check if it's an invalid character error
